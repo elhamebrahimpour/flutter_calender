@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_calender/data/datasource/local_datasource.dart';
 import 'package:flutter_calender/data/model/event.dart';
+import 'package:flutter_calender/data/repository/local_repository.dart';
 import 'package:flutter_calender/service/notification_service.dart';
 import 'package:flutter_calender/utilities/const_colors.dart';
 import 'package:day_night_time_picker/day_night_time_picker.dart';
@@ -105,19 +105,18 @@ class _AddNewEventButtonsheetState extends State<AddNewEventButtonsheet> {
                 backgroundColor: AppColors.mainColor,
               ),
               onPressed: () async {
-                if (titleTextController.text.isEmpty) {
+                if (titleTextController.text.isEmpty &&
+                    descriptionTextController.text.isEmpty) {
                   return;
                 } else {
-                  final newEvent = Calenderevent(
+                  final newEvent = EventModel(
                     titleTextController.text.trim(),
                     widget.selectedDay,
                     scheduleReminder,
                     descriptionTextController.text.trim(),
                   );
-
-                  await HiveLocalDatasource().addNewEvent(newEvent);
-
-                  await NotificationApi.onScheduleEvent(newEvent);
+                  await HiveLocalRepository().addNewEvent(newEvent);
+                  await NotificationApi.onScheduledEvent(newEvent);
 
                   if (mounted) Navigator.pop(context);
 

@@ -4,7 +4,7 @@ import 'package:flutter_calender/data/model/event.dart';
 import 'package:flutter_calender/utilities/const_colors.dart';
 
 class EventItemGenerator extends StatelessWidget {
-  final Calenderevent event;
+  final EventModel event;
 
   const EventItemGenerator({Key? key, required this.event}) : super(key: key);
 
@@ -22,7 +22,7 @@ class EventItemGenerator extends StatelessWidget {
 }
 
 class EventItemContent extends StatelessWidget {
-  final Calenderevent event;
+  final EventModel event;
 
   const EventItemContent({
     super.key,
@@ -109,7 +109,7 @@ class EventItemContent extends StatelessWidget {
 }
 
 class CheckBoxItem extends StatefulWidget {
-  final Calenderevent event;
+  final EventModel event;
   const CheckBoxItem({
     required this.event,
     super.key,

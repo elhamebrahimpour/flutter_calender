@@ -21,7 +21,7 @@ class NotificationApi {
     );
   }
 
-  static Future<void> onScheduleEvent(Calenderevent event) async {
+  static Future<void> onScheduledEvent(EventModel event) async {
     tz.initializeTimeZones();
 
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
@@ -37,7 +37,7 @@ class NotificationApi {
 
     await _flutterLocalNotificationsPlugin.zonedSchedule(
         0,
-        'eminder',
+        'reminder',
         '${event.title} starts at ${DateFormat('hh:mm a').format(event.time)}',
         tz.TZDateTime.from(event.time, tz.local),
         platformChannelSpecifics,

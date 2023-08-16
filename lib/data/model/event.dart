@@ -3,7 +3,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 part 'event.g.dart';
 
 @HiveType(typeId: 0)
-class Calenderevent extends HiveObject {
+class EventModel extends HiveObject {
   @HiveField(0)
   String title;
   @HiveField(1)
@@ -15,7 +15,7 @@ class Calenderevent extends HiveObject {
   @HiveField(4)
   bool isDone;
 
-  Calenderevent(
+  EventModel(
     this.title,
     this.date,
     this.time,

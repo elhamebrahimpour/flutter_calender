@@ -6,17 +6,17 @@ part of 'event.dart';
 // TypeAdapterGenerator
 // **************************************************************************
 
-class CalendereventAdapter extends TypeAdapter<Calenderevent> {
+class EventModelAdapter extends TypeAdapter<EventModel> {
   @override
   final int typeId = 0;
 
   @override
-  Calenderevent read(BinaryReader reader) {
+  EventModel read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return Calenderevent(
+    return EventModel(
       fields[0] as String,
       fields[1] as DateTime,
       fields[2] as DateTime,
@@ -26,7 +26,7 @@ class CalendereventAdapter extends TypeAdapter<Calenderevent> {
   }
 
   @override
-  void write(BinaryWriter writer, Calenderevent obj) {
+  void write(BinaryWriter writer, EventModel obj) {
     writer
       ..writeByte(5)
       ..writeByte(0)
@@ -47,7 +47,7 @@ class CalendereventAdapter extends TypeAdapter<Calenderevent> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is CalendereventAdapter &&
+      other is EventModelAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

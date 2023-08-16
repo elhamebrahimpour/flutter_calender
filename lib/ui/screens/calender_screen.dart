@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_calender/cubit/change_cubit.dart';
 import 'package:flutter_calender/data/repository/local_repository.dart';
 import 'package:flutter_calender/ui/widgets/add_event_button.dart';
 import 'package:flutter_calender/ui/widgets/tabbar_view_content.dart';
@@ -16,6 +18,8 @@ class CalenderScreen extends StatefulWidget {
 
 class _CalenderScreenState extends State<CalenderScreen>
     with SingleTickerProviderStateMixin {
+  final AppCubit appCubit = AppCubit();
+
   DateTime _today = DateTime.now();
   DateTime _selectedDay = DateTime.now();
   TabController? _tabController;
@@ -39,99 +43,100 @@ class _CalenderScreenState extends State<CalenderScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
-      resizeToAvoidBottomInset: false,
-      appBar: _buildCalenderAppbar(),
-      body: NotificationListener<UserScrollNotification>(
-        onNotification: (notification) {
-          setState(() {
-            if (notification.direction == ScrollDirection.forward) {
-              _isFabVisible = true;
-            }
-            if (notification.direction == ScrollDirection.reverse) {
-              _isFabVisible = false;
-            }
-          });
-          return true;
-        },
-        child: _getBodyContent(),
-      ),
-      floatingActionButton: Visibility(
-        visible: _isFabVisible,
-        child: FloatingActionButton(
-          backgroundColor: AppColors.mainColor,
-          onPressed: () => showModalBottomSheet(
-            barrierColor: Colors.transparent,
-            backgroundColor: Colors.transparent,
-            isScrollControlled: true,
-            context: context,
-            builder: (context) {
-              return Padding(
-                padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).viewInsets.bottom),
-                child: AddNewEventButtonsheet(
-                  selectedDay: _selectedDay,
-                ),
-              );
+    return BlocBuilder<AppCubit, CubitState>(
+      bloc: appCubit,
+      builder: (context, state) {
+        return Scaffold(
+          backgroundColor: AppColors.backgroundColor,
+          resizeToAvoidBottomInset: false,
+          appBar: _buildCalenderAppbar(),
+          body: NotificationListener<UserScrollNotification>(
+            onNotification: (notification) {
+              setState(() {
+                if (notification.direction == ScrollDirection.forward) {
+                  _isFabVisible = true;
+                }
+                if (notification.direction == ScrollDirection.reverse) {
+                  _isFabVisible = false;
+                }
+              });
+              return true;
             },
-          ).then((value) {
-            setState(() {});
-          }),
-          child: const Icon(Icons.add),
-        ),
-      ),
-    );
-  }
-
-  SafeArea _getBodyContent() {
-    return SafeArea(
-      child: Column(
-        children: [
-          Card(
-            child: TableCalendar(
-              firstDay: DateTime.utc(2010, 10, 16),
-              lastDay: DateTime.utc(2030, 3, 14),
-              focusedDay: _today,
-              calendarFormat: CalendarFormat.month,
-              headerStyle: const HeaderStyle(
-                titleCentered: true,
-                formatButtonVisible: false,
+            child: SafeArea(
+              child: Column(
+                children: [
+                  Card(
+                    child: TableCalendar(
+                      firstDay: DateTime.utc(2010, 10, 16),
+                      lastDay: DateTime.utc(2030, 3, 14),
+                      focusedDay: _today,
+                      calendarFormat: CalendarFormat.month,
+                      headerStyle: const HeaderStyle(
+                        titleCentered: true,
+                        formatButtonVisible: false,
+                      ),
+                      availableGestures: AvailableGestures.all,
+                      calendarStyle: CalendarStyle(
+                        canMarkersOverflow: true,
+                        todayDecoration: _calenderDecoration(
+                          AppColors.mainColor.withOpacity(0.2),
+                        ),
+                        todayTextStyle: _dayTextStyle(AppColors.blackColor),
+                        selectedDecoration: _calenderDecoration(
+                          AppColors.mainColor,
+                        ),
+                        markersMaxCount: 1,
+                        markerSize: 10,
+                        markerDecoration: _calenderDecoration(
+                          AppColors.markColor,
+                        ),
+                        selectedTextStyle: _dayTextStyle(AppColors.whiteColor),
+                      ),
+                      selectedDayPredicate: (day) =>
+                          isSameDay(day, _selectedDay),
+                      onDaySelected: _onDaySelected,
+                      onPageChanged: (focusedDay) =>
+                          appCubit.onChanged(focusedDay),
+                      eventLoader: HiveLocalRepository().getEventsByDay,
+                    ),
+                  ),
+                  TabBarItems(tabController: _tabController),
+                  Expanded(
+                    child: TabBarViewContent(
+                      _tabController,
+                      _selectedDay,
+                    ),
+                  )
+                ],
               ),
-              availableGestures: AvailableGestures.all,
-              calendarStyle: CalendarStyle(
-                canMarkersOverflow: true,
-                todayDecoration: _calenderDecoration(
-                  AppColors.mainColor.withOpacity(0.2),
-                ),
-                todayTextStyle: _dayTextStyle(AppColors.blackColor),
-                selectedDecoration: _calenderDecoration(
-                  AppColors.mainColor,
-                ),
-                markersMaxCount: 1,
-                markerSize: 10,
-                markerDecoration: _calenderDecoration(
-                  AppColors.markColor,
-                ),
-                selectedTextStyle: _dayTextStyle(AppColors.whiteColor),
-              ),
-              selectedDayPredicate: (day) => isSameDay(day, _selectedDay),
-              onDaySelected: _onDaySelected,
-              onPageChanged: (focusedDay) => setState(() {
-                _today = focusedDay;
-              }),
-              eventLoader: HiveLocalRepository().getEventsByDay,
             ),
           ),
-          TabBarItems(tabController: _tabController),
-          Expanded(
-            child: TabBarViewContent(
-              _tabController,
-              _selectedDay,
+          floatingActionButton: Visibility(
+            visible: _isFabVisible,
+            child: FloatingActionButton(
+              backgroundColor: AppColors.mainColor,
+              onPressed: () => showModalBottomSheet(
+                barrierColor: Colors.transparent,
+                backgroundColor: Colors.transparent,
+                isScrollControlled: true,
+                context: context,
+                builder: (context) {
+                  return Padding(
+                    padding: EdgeInsets.only(
+                        bottom: MediaQuery.of(context).viewInsets.bottom),
+                    child: AddNewEventButtonsheet(
+                      selectedDay: _selectedDay,
+                    ),
+                  );
+                },
+              ).then((value) {
+                appCubit.onUpdateScreen();
+              }),
+              child: const Icon(Icons.add),
             ),
-          )
-        ],
-      ),
+          ),
+        );
+      },
     );
   }
 

@@ -8,6 +8,7 @@ import 'package:flutter_calender/utilities/const_colors.dart';
 class TabBarViewContent extends StatelessWidget {
   final TabController? tabController;
   final DateTime selectedDay;
+
   const TabBarViewContent(this.tabController, this.selectedDay, {super.key});
 
   @override
@@ -45,7 +46,7 @@ class CompletedEvents extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(bottom: 8),
                       child: EventItemGenerator(
-                        event: Calenderevent(
+                        event: EventModel(
                           'test',
                           selectedDay,
                           selectedDay,

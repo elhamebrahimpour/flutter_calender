@@ -6,8 +6,8 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 void main() async {
   await Hive.initFlutter();
-  Hive.registerAdapter(CalendereventAdapter());
-  await Hive.openBox<Calenderevent>('eventBox');
+  Hive.registerAdapter(EventModelAdapter());
+  await Hive.openBox<EventModel>('eventBox');
 
   NotificationApi.initNotification();
 
@@ -21,7 +21,7 @@ class Application extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: CalenderScreen(),
+      home:  CalenderScreen(),
     );
   }
 }
