@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_calender/bloc/calendar_bloc.dart';
 import 'package:flutter_calender/data/model/event.dart';
-import 'package:flutter_calender/data/repository/local_repository.dart';
 import 'package:flutter_calender/ui/widgets/event_item.dart';
 import 'package:flutter_calender/utilities/const_colors.dart';
 
@@ -8,17 +9,25 @@ import 'package:flutter_calender/utilities/const_colors.dart';
 class TabBarViewContent extends StatelessWidget {
   final TabController? tabController;
   final DateTime selectedDay;
-
-  const TabBarViewContent(this.tabController, this.selectedDay, {super.key});
+  final List<EventModel> events;
+  const TabBarViewContent(this.tabController, this.selectedDay, this.events,
+      {super.key});
 
   @override
   Widget build(BuildContext context) {
-    return TabBarView(
-      controller: tabController,
-      children: [
-        OngoingEvents(selectedDay: selectedDay),
-        CompletedEvents(selectedDay: selectedDay)
-      ],
+    return BlocBuilder<CalendarBloc, CalendarState>(
+      builder: (context, state) {
+        return TabBarView(
+          controller: tabController,
+          children: [
+            OngoingEvents(
+              selectedDay: selectedDay,
+              events: events,
+            ),
+            CompletedEvents(selectedDay: selectedDay)
+          ],
+        );
+      },
     );
   }
 }
@@ -82,8 +91,10 @@ class CompletedEvents extends StatelessWidget {
 
 class OngoingEvents extends StatelessWidget {
   final DateTime selectedDay;
+  final List<EventModel> events;
 
-  const OngoingEvents({super.key, required this.selectedDay});
+  const OngoingEvents(
+      {super.key, required this.selectedDay, required this.events});
 
   @override
   Widget build(BuildContext context) {
@@ -97,12 +108,11 @@ class OngoingEvents extends StatelessWidget {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: EventItemGenerator(
-                      event: HiveLocalRepository()
-                          .getEventsByDay(selectedDay)[index]),
+                    event: getEventsByDay(events, selectedDay)[index],
+                  ),
                 );
               },
-              childCount:
-                  HiveLocalRepository().getEventsByDay(selectedDay).length,
+              childCount: getEventsByDay(events, selectedDay).length,
             ),
           ),
         ),

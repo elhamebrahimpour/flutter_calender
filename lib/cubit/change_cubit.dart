@@ -9,8 +9,4 @@ class AppCubit extends Cubit<CubitState> {
   void onChanged(DateTime dateTime) => emit(
         ChangeFocusedDay(dateTime),
       );
-
-  void onUpdateScreen() {
-    emit(UpdateScreen());
-  }
 }

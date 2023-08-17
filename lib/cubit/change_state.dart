@@ -9,5 +9,3 @@ class ChangeFocusedDay extends CubitState {
   final DateTime focusDateTime;
   ChangeFocusedDay(this.focusDateTime);
 }
-
-class UpdateScreen extends CubitState {}

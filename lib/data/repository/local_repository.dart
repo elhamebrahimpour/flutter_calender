@@ -6,11 +6,13 @@ abstract class ILocalRepository {
 
   Future<void> deleteEvent(EventModel eventModel);
 
-  List<EventModel> getEventsByDay(DateTime day);
+  Future<List<EventModel>> getAllEvents();
 }
 
 class HiveLocalRepository extends ILocalRepository {
-  final ILocalDatasource _localDatasource = HiveLocalDatasource();
+  final ILocalDatasource _localDatasource;
+
+  HiveLocalRepository(this._localDatasource);
 
   @override
   Future<void> addNewEvent(EventModel eventModel) async {
@@ -23,7 +25,7 @@ class HiveLocalRepository extends ILocalRepository {
   }
 
   @override
-  List<EventModel> getEventsByDay(DateTime day) {
-    return _localDatasource.getEventsByDay(day);
+  Future<List<EventModel>> getAllEvents() async {
+    return await _localDatasource.getAllEvents();
   }
 }

@@ -1,13 +1,12 @@
 import 'package:flutter_calender/data/model/event.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:table_calendar/table_calendar.dart';
 
 abstract class ILocalDatasource {
   Future<void> addNewEvent(EventModel eventModel);
 
   Future<void> deleteEvent(EventModel eventModel);
 
-  List<EventModel> getEventsByDay(DateTime day);
+  Future<List<EventModel>> getAllEvents();
 }
 
 class HiveLocalDatasource extends ILocalDatasource {
@@ -24,8 +23,7 @@ class HiveLocalDatasource extends ILocalDatasource {
   }
 
   @override
-  List<EventModel> getEventsByDay(DateTime day) {
-    final events = eventBox.values.toList();
-    return events.where((event) => isSameDay(event.date, day)).toList();
+  Future<List<EventModel>> getAllEvents() async {
+    return eventBox.values.toList();
   }
 }

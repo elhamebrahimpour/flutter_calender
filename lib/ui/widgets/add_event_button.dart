@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_calender/data/model/event.dart';
-import 'package:flutter_calender/data/repository/local_repository.dart';
-import 'package:flutter_calender/service/notification_service.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_calender/bloc/calendar_bloc.dart';
 import 'package:flutter_calender/utilities/const_colors.dart';
 import 'package:day_night_time_picker/day_night_time_picker.dart';
 import 'package:flutter_calender/utilities/extension/time_extention.dart';
@@ -109,19 +108,19 @@ class _AddNewEventButtonsheetState extends State<AddNewEventButtonsheet> {
                     descriptionTextController.text.isEmpty) {
                   return;
                 } else {
-                  final newEvent = EventModel(
-                    titleTextController.text.trim(),
-                    widget.selectedDay,
-                    scheduleReminder,
-                    descriptionTextController.text.trim(),
-                  );
-                  await HiveLocalRepository().addNewEvent(newEvent);
-                  await NotificationApi.onScheduledEvent(newEvent);
-
-                  if (mounted) Navigator.pop(context);
+                  context.read<CalendarBloc>().add(
+                        CalendarAddedNewEvent(
+                          titleTextController.text.trim(),
+                          widget.selectedDay,
+                          scheduleReminder,
+                          descriptionTextController.text.trim(),
+                        ),
+                      );
 
                   titleTextController.clear();
                   descriptionTextController.clear();
+
+                  if (mounted) Navigator.pop(context);
                 }
               },
               child: const Text('Add Event'),
