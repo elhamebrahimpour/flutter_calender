@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_calender/bloc/calendar_bloc.dart';
+import 'package:flutter_calender/data/model/done_event.dart';
 import 'package:flutter_calender/data/model/event.dart';
 import 'package:flutter_calender/ui/widgets/event_item.dart';
 import 'package:flutter_calender/utilities/const_colors.dart';
@@ -10,7 +11,10 @@ class TabBarViewContent extends StatelessWidget {
   final TabController? tabController;
   final DateTime selectedDay;
   final List<EventModel> events;
-  const TabBarViewContent(this.tabController, this.selectedDay, this.events,
+  final List<CompletedEvent> completedEvents;
+
+  const TabBarViewContent(
+      this.tabController, this.selectedDay, this.events, this.completedEvents,
       {super.key});
 
   @override
@@ -24,7 +28,10 @@ class TabBarViewContent extends StatelessWidget {
               selectedDay: selectedDay,
               events: events,
             ),
-            CompletedEvents(selectedDay: selectedDay)
+            CompletedEvents(
+              selectedDay: selectedDay,
+              completedEvents: completedEvents,
+            )
           ],
         );
       },
@@ -34,10 +41,12 @@ class TabBarViewContent extends StatelessWidget {
 
 class CompletedEvents extends StatelessWidget {
   final DateTime selectedDay;
+  final List<CompletedEvent> completedEvents;
 
   const CompletedEvents({
     super.key,
     required this.selectedDay,
+    required this.completedEvents,
   });
 
   @override
@@ -54,13 +63,44 @@ class CompletedEvents extends StatelessWidget {
                   children: [
                     Padding(
                       padding: const EdgeInsets.only(bottom: 8),
-                      child: EventItemGenerator(
-                        event: EventModel(
-                          'test',
-                          selectedDay,
-                          selectedDay,
-                          'test',
-                          isDone: true,
+                      child: Card(
+                        elevation: 1,
+                        color: AppColors.whiteColor,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Row(
+                            children: [
+                              Container(
+                                height: 46,
+                                width: 46,
+                                decoration: BoxDecoration(
+                                  color: AppColors.mainColor.withOpacity(0.7),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    '${completedEvents[index].date.day}',
+                                    style: const TextStyle(
+                                      color: AppColors.whiteColor,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(
+                                width: 16,
+                              ),
+                              Text(
+                                completedEvents[index].title,
+                                style: TextStyle(
+                                  color: AppColors.blackColor.withOpacity(0.9),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -80,7 +120,7 @@ class CompletedEvents extends StatelessWidget {
                   ],
                 );
               },
-              childCount: 2,
+              childCount: completedEvents.length,
             ),
           ),
         ),

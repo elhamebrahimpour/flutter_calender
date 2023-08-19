@@ -6,7 +6,8 @@ class CalendarInitialState extends CalendarState {}
 
 class CalendarFetchDataFromHiveState extends CalendarState {
   final List<EventModel> events;
-  CalendarFetchDataFromHiveState(this.events);
+  final List<CompletedEvent> completedEvents;
+  CalendarFetchDataFromHiveState(this.events, this.completedEvents);
 }
 
 class CalendarUpdateDataState extends CalendarState {}

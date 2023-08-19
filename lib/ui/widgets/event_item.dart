@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_calender/bloc/calendar_bloc.dart';
 import 'package:flutter_calender/data/model/event.dart';
 import 'package:flutter_calender/utilities/const_colors.dart';
 
@@ -145,6 +147,11 @@ class _CheckBoxItemState extends State<CheckBoxItem> {
             widget.event.isDone = _isBoxChecked;
             widget.event.save();
           });
+          BlocProvider.of<CalendarBloc>(context)
+              .add(CalendarDeletedEvent(widget.event));
+
+          BlocProvider.of<CalendarBloc>(context).add(
+              CalendarCompletedEvent(widget.event.title, widget.event.date));
         },
       ),
     );

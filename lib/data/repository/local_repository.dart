@@ -1,4 +1,5 @@
 import 'package:flutter_calender/data/datasource/local_datasource.dart';
+import 'package:flutter_calender/data/model/done_event.dart';
 import 'package:flutter_calender/data/model/event.dart';
 
 abstract class ILocalRepository {
@@ -6,7 +7,11 @@ abstract class ILocalRepository {
 
   Future<void> deleteEvent(EventModel eventModel);
 
-  Future<List<EventModel>> getAllEvents();
+  List<EventModel> getAllEvents();
+
+  Future<void> addToCompletedBox(CompletedEvent completedEvent);
+
+  List<CompletedEvent> getCompletedEvents();
 }
 
 class HiveLocalRepository extends ILocalRepository {
@@ -25,7 +30,17 @@ class HiveLocalRepository extends ILocalRepository {
   }
 
   @override
-  Future<List<EventModel>> getAllEvents() async {
-    return await _localDatasource.getAllEvents();
+  List<EventModel> getAllEvents() {
+    return _localDatasource.getAllEvents();
+  }
+
+  @override
+  Future<void> addToCompletedBox(CompletedEvent completedEvent) async {
+    await _localDatasource.addToCompletedBox(completedEvent);
+  }
+
+  @override
+  List<CompletedEvent> getCompletedEvents() {
+    return _localDatasource.getCompletedEvents();
   }
 }

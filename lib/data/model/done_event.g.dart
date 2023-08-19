@@ -1,44 +1,35 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'event.dart';
+part of 'done_event.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class EventModelAdapter extends TypeAdapter<EventModel> {
+class CompletedEventAdapter extends TypeAdapter<CompletedEvent> {
   @override
-  final int typeId = 2;
+  final int typeId = 3;
 
   @override
-  EventModel read(BinaryReader reader) {
+  CompletedEvent read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return EventModel(
+    return CompletedEvent(
       fields[0] as String,
-      fields[1] as String,
-      fields[2] as DateTime,
-      fields[3] as DateTime,
-      isDone: fields[4] as bool,
+      fields[1] as DateTime,
     );
   }
 
   @override
-  void write(BinaryWriter writer, EventModel obj) {
+  void write(BinaryWriter writer, CompletedEvent obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(2)
       ..writeByte(0)
       ..write(obj.title)
       ..writeByte(1)
-      ..write(obj.description)
-      ..writeByte(2)
-      ..write(obj.date)
-      ..writeByte(3)
-      ..write(obj.time)
-      ..writeByte(4)
-      ..write(obj.isDone);
+      ..write(obj.date);
   }
 
   @override
@@ -47,7 +38,7 @@ class EventModelAdapter extends TypeAdapter<EventModel> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is EventModelAdapter &&
+      other is CompletedEventAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

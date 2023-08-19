@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:flutter_calender/data/model/done_event.dart';
 import 'package:flutter_calender/data/model/event.dart';
 import 'package:flutter_calender/data/repository/local_repository.dart';
 import 'package:flutter_calender/service/notification_service.dart';
@@ -12,17 +13,18 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
 
   CalendarBloc(this._localRepository) : super(CalendarInitialState()) {
     on<CalendarFetchedDataFromHiveEvent>((event, emit) async {
-      final events = await _localRepository.getAllEvents();
+      final events = _localRepository.getAllEvents();
+      final completedEvents = _localRepository.getCompletedEvents();
 
-      emit(CalendarFetchDataFromHiveState(events));
+      emit(CalendarFetchDataFromHiveState(events, completedEvents));
     });
 
     on<CalendarAddedNewEvent>((event, emit) async {
       var newEvent = EventModel(
         event.eventTitle,
+        event.eventDescription,
         event.date,
         event.time,
-        event.eventDescription,
       );
 
       await _localRepository.addNewEvent(newEvent);
@@ -35,6 +37,12 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
     on<CalendarDeletedEvent>((event, emit) async {
       await _localRepository.deleteEvent(event.eventModel);
       emit(CalendarUpdateDataState());
+    });
+
+    on<CalendarCompletedEvent>((event, emit) async {
+      await _localRepository.addToCompletedBox(
+        CompletedEvent(event.title, event.date),
+      );
     });
   }
 }

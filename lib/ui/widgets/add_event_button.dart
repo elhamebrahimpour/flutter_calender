@@ -111,9 +111,9 @@ class _AddNewEventButtonsheetState extends State<AddNewEventButtonsheet> {
                   context.read<CalendarBloc>().add(
                         CalendarAddedNewEvent(
                           titleTextController.text.trim(),
+                          descriptionTextController.text.trim(),
                           widget.selectedDay,
                           scheduleReminder,
-                          descriptionTextController.text.trim(),
                         ),
                       );
 

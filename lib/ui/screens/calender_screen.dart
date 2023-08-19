@@ -41,6 +41,7 @@ class _CalenderScreenState extends State<CalenderScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this, initialIndex: 0);
+    context.read<CalendarBloc>().add(CalendarFetchedDataFromHiveEvent());
   }
 
   @override
@@ -117,6 +118,7 @@ class _CalenderScreenState extends State<CalenderScreen>
                             _tabController,
                             _selectedDay,
                             state.events,
+                            state.completedEvents,
                           ),
                         )
                       ]
