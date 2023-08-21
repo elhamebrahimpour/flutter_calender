@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_calender/bloc/calendar_bloc.dart';
 import 'package:flutter_calender/data/model/done_event.dart';
 import 'package:flutter_calender/data/model/event.dart';
+import 'package:flutter_calender/ui/widgets/completed_event_item.dart';
 import 'package:flutter_calender/ui/widgets/event_item.dart';
 import 'package:flutter_calender/utilities/const_colors.dart';
 
@@ -51,81 +52,52 @@ class CompletedEvents extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(
-      slivers: [
-        SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-          sliver: SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                return Stack(
-                  alignment: Alignment.topCenter,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Card(
-                        elevation: 1,
+    return completedEvents.isEmpty
+        ? const Center(
+            child: Text('empty'),
+          )
+        : CustomScrollView(
+            slivers: [
+              SliverPadding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      return CompletedEventItemGenerator(
+                        completedEvents: completedEvents[index],
+                      );
+                    },
+                    childCount: completedEvents.length,
+                  ),
+                ),
+              ),
+              SliverPadding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                sliver: SliverToBoxAdapter(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      elevation: 0.5,
+                      backgroundColor: AppColors.buttonColor,
+                      minimumSize: const Size(120, 42),
+                    ),
+                    onPressed: () => BlocProvider.of<CalendarBloc>(context).add(
+                      ClearAllEvent(),
+                    ),
+                    child: const Text(
+                      'Clear All',
+                      style: TextStyle(
                         color: AppColors.whiteColor,
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Row(
-                            children: [
-                              Container(
-                                height: 46,
-                                width: 46,
-                                decoration: BoxDecoration(
-                                  color: AppColors.mainColor.withOpacity(0.7),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    '${completedEvents[index].date.day}',
-                                    style: const TextStyle(
-                                      color: AppColors.whiteColor,
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(
-                                width: 16,
-                              ),
-                              Text(
-                                completedEvents[index].title,
-                                style: TextStyle(
-                                  color: AppColors.blackColor.withOpacity(0.9),
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                    Positioned(
-                      top: 4,
-                      left: 4,
-                      right: 4,
-                      bottom: 12,
-                      child: Container(
-                        height: 80,
-                        decoration: BoxDecoration(
-                          color: AppColors.blackColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              },
-              childCount: completedEvents.length,
-            ),
-          ),
-        ),
-      ],
-    );
+                  ),
+                ),
+              ),
+            ],
+          );
   }
 }
 

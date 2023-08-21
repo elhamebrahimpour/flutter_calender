@@ -39,10 +39,15 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
       emit(CalendarUpdateDataState());
     });
 
-    on<CalendarCompletedEvent>((event, emit) async {
+    on<CalendarAddedToCompletedEvent>((event, emit) async {
       await _localRepository.addToCompletedBox(
         CompletedEvent(event.title, event.date),
       );
+    });
+
+    on<ClearAllEvent>((event, emit) async {
+      await _localRepository.clearAllEvents();
+      emit(CalendarUpdateDataState());
     });
   }
 }

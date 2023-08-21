@@ -19,8 +19,10 @@ class CalendarDeletedEvent extends CalendarEvent {
   CalendarDeletedEvent(this.eventModel);
 }
 
-class CalendarCompletedEvent extends CalendarEvent {
+class CalendarAddedToCompletedEvent extends CalendarEvent {
   final String title;
   final DateTime date;
-  CalendarCompletedEvent(this.title, this.date);
+  CalendarAddedToCompletedEvent(this.title, this.date);
 }
+
+class ClearAllEvent extends CalendarEvent {}

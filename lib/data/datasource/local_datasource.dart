@@ -13,7 +13,7 @@ abstract class ILocalDatasource {
 
   List<CompletedEvent> getCompletedEvents();
 
-  Future<void> deleteAllEvents();
+  Future<void> clearAllEvents();
 }
 
 class HiveLocalDatasource extends ILocalDatasource {
@@ -46,7 +46,7 @@ class HiveLocalDatasource extends ILocalDatasource {
   }
 
   @override
-  Future<void> deleteAllEvents() async {
-    await completedEventBox.delete('completedEventBox');
+  Future<void> clearAllEvents() async {
+    await completedEventBox.clear();
   }
 }

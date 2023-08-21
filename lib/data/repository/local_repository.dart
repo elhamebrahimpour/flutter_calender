@@ -12,6 +12,8 @@ abstract class ILocalRepository {
   Future<void> addToCompletedBox(CompletedEvent completedEvent);
 
   List<CompletedEvent> getCompletedEvents();
+
+  Future<void> clearAllEvents();
 }
 
 class HiveLocalRepository extends ILocalRepository {
@@ -42,5 +44,10 @@ class HiveLocalRepository extends ILocalRepository {
   @override
   List<CompletedEvent> getCompletedEvents() {
     return _localDatasource.getCompletedEvents();
+  }
+
+  @override
+  Future<void> clearAllEvents() async {
+    await _localDatasource.clearAllEvents();
   }
 }

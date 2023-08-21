@@ -12,4 +12,6 @@ class AppColors {
   static const greyColor = Color(0xffbfc3c8);
 
   static const markColor = Color.fromARGB(255, 247, 164, 47);
+
+  static const buttonColor = Color.fromARGB(255, 0, 36, 122);
 }

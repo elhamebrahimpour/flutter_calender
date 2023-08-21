@@ -27,6 +27,9 @@ class _CalenderScreenState extends State<CalenderScreen>
   TabController? _tabController;
   bool _isFabVisible = true;
 
+  int totalEvents = 0;
+  int completedEvents = 0;
+
   // calendar ui method
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
     if (!isSameDay(_selectedDay, selectedDay)) {
@@ -66,63 +69,79 @@ class _CalenderScreenState extends State<CalenderScreen>
               return true;
             },
             child: SafeArea(
-              child: BlocBuilder<CalendarBloc, CalendarState>(
+              child: BlocConsumer<CalendarBloc, CalendarState>(
+                listener: (context, state) {
+                  if (state is CalendarUpdateDataState) {
+                    context
+                        .read<CalendarBloc>()
+                        .add(CalendarFetchedDataFromHiveEvent());
+                  }
+                },
                 builder: (context, state) {
-                  return Column(
-                    children: [
-                      Card(
-                        child: TableCalendar(
-                          firstDay: DateTime.utc(2010, 10, 16),
-                          lastDay: DateTime.utc(2030, 3, 14),
-                          focusedDay: _today,
-                          calendarFormat: CalendarFormat.month,
-                          headerStyle: const HeaderStyle(
-                            titleCentered: true,
-                            formatButtonVisible: false,
+                  return BlocBuilder<CalendarBloc, CalendarState>(
+                    builder: (context, state) {
+                      if (state is CalendarFetchDataFromHiveState) {
+                        totalEvents = state.events.length;
+                        completedEvents = state.completedEvents.length;
+                      }
+                      return Column(
+                        children: [
+                          Card(
+                            child: TableCalendar(
+                              firstDay: DateTime.utc(2010, 10, 16),
+                              lastDay: DateTime.utc(2030, 3, 14),
+                              focusedDay: _today,
+                              calendarFormat: CalendarFormat.month,
+                              headerStyle: const HeaderStyle(
+                                titleCentered: true,
+                                formatButtonVisible: false,
+                              ),
+                              availableGestures: AvailableGestures.all,
+                              calendarStyle: CalendarStyle(
+                                canMarkersOverflow: true,
+                                todayDecoration: FuncUtils.calenderDecoration(
+                                  AppColors.mainColor.withOpacity(0.2),
+                                ),
+                                todayTextStyle: FuncUtils.dayTextStyle(
+                                    AppColors.blackColor),
+                                selectedDecoration:
+                                    FuncUtils.calenderDecoration(
+                                  AppColors.mainColor,
+                                ),
+                                markersMaxCount: 1,
+                                markerSize: 10,
+                                markerDecoration: FuncUtils.calenderDecoration(
+                                  AppColors.markColor,
+                                ),
+                                selectedTextStyle: FuncUtils.dayTextStyle(
+                                    AppColors.whiteColor),
+                              ),
+                              selectedDayPredicate: (day) =>
+                                  isSameDay(day, _selectedDay),
+                              onDaySelected: _onDaySelected,
+                              onPageChanged: (focusedDay) =>
+                                  appCubit.onChanged(focusedDay),
+                              eventLoader: (day) {
+                                return (state is CalendarFetchDataFromHiveState)
+                                    ? getEventsByDay(state.events, day)
+                                    : [];
+                              },
+                            ),
                           ),
-                          availableGestures: AvailableGestures.all,
-                          calendarStyle: CalendarStyle(
-                            canMarkersOverflow: true,
-                            todayDecoration: FuncUtils.calenderDecoration(
-                              AppColors.mainColor.withOpacity(0.2),
+                          TabBarItems(tabController: _tabController),
+                          if (state is CalendarFetchDataFromHiveState) ...{
+                            Expanded(
+                              child: TabBarViewContent(
+                                _tabController,
+                                _selectedDay,
+                                state.events,
+                                state.completedEvents,
+                              ),
                             ),
-                            todayTextStyle:
-                                FuncUtils.dayTextStyle(AppColors.blackColor),
-                            selectedDecoration: FuncUtils.calenderDecoration(
-                              AppColors.mainColor,
-                            ),
-                            markersMaxCount: 1,
-                            markerSize: 10,
-                            markerDecoration: FuncUtils.calenderDecoration(
-                              AppColors.markColor,
-                            ),
-                            selectedTextStyle:
-                                FuncUtils.dayTextStyle(AppColors.whiteColor),
-                          ),
-                          selectedDayPredicate: (day) =>
-                              isSameDay(day, _selectedDay),
-                          onDaySelected: _onDaySelected,
-                          onPageChanged: (focusedDay) =>
-                              appCubit.onChanged(focusedDay),
-                          eventLoader: (day) {
-                            return (state is CalendarFetchDataFromHiveState)
-                                ? getEventsByDay(state.events, day)
-                                : [];
                           },
-                        ),
-                      ),
-                      TabBarItems(tabController: _tabController),
-                      if (state is CalendarFetchDataFromHiveState) ...[
-                        Expanded(
-                          child: TabBarViewContent(
-                            _tabController,
-                            _selectedDay,
-                            state.events,
-                            state.completedEvents,
-                          ),
-                        )
-                      ]
-                    ],
+                        ],
+                      );
+                    },
                   );
                 },
               ),
@@ -131,7 +150,7 @@ class _CalenderScreenState extends State<CalenderScreen>
           floatingActionButton: Visibility(
             visible: _isFabVisible,
             child: FloatingActionButton(
-              backgroundColor: AppColors.mainColor,
+              backgroundColor: AppColors.buttonColor,
               onPressed: () => showModalBottomSheet(
                 barrierColor: Colors.transparent,
                 backgroundColor: Colors.transparent,
@@ -149,11 +168,7 @@ class _CalenderScreenState extends State<CalenderScreen>
                     ),
                   );
                 },
-              ).then((value) {
-                context
-                    .read<CalendarBloc>()
-                    .add(CalendarFetchedDataFromHiveEvent());
-              }),
+              ),
               child: const Icon(Icons.add),
             ),
           ),
@@ -163,6 +178,7 @@ class _CalenderScreenState extends State<CalenderScreen>
   }
 
   AppBar _buildCalenderAppbar() {
+    double percent = completedEvents / totalEvents;
     return AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
@@ -181,10 +197,12 @@ class _CalenderScreenState extends State<CalenderScreen>
             lineWidth: 4,
             animation: true,
             animationDuration: 800,
-            percent: 0.1,
-            center: const Text(
-              '10%',
-              style: TextStyle(
+            percent: completedEvents == 0 ? 0.01 : percent,
+            center: Text(
+              completedEvents == 0
+                  ? '0%'
+                  : '${(percent * 100).toStringAsFixed(0)}%',
+              style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 14.0,
               ),

@@ -5,129 +5,140 @@ import 'package:flutter_calender/bloc/calendar_bloc.dart';
 import 'package:flutter_calender/data/model/event.dart';
 import 'package:flutter_calender/utilities/const_colors.dart';
 
-class EventItemGenerator extends StatelessWidget {
+class EventItemGenerator extends StatefulWidget {
   final EventModel event;
 
   const EventItemGenerator({Key? key, required this.event}) : super(key: key);
 
   @override
+  State<EventItemGenerator> createState() => _EventItemGeneratorState();
+}
+
+class _EventItemGeneratorState extends State<EventItemGenerator> {
+  @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 1,
-      color: AppColors.whiteColor,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: EventItemContent(event: event),
+    return Dismissible(
+      key: UniqueKey(),
+      onDismissed: (direction) {
+        BlocProvider.of<CalendarBloc>(context)
+            .add(CalendarDeletedEvent(widget.event));
+
+        BlocProvider.of<CalendarBloc>(context).add(
+          CalendarAddedToCompletedEvent(widget.event.title, widget.event.date),
+        );
+      },
+      child: Card(
+        elevation: 1,
+        color: AppColors.whiteColor,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              _buildDateShape(),
+              const SizedBox(
+                width: 16,
+              ),
+              _buildTitleDescription(),
+              const Spacer(),
+              _buildAlarmTime(),
+              EventChekcedBox(eventModel: widget.event)
+            ],
+          ),
+        ),
       ),
     );
   }
-}
 
-class EventItemContent extends StatelessWidget {
-  final EventModel event;
-
-  const EventItemContent({
-    super.key,
-    required this.event,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          height: 46,
-          width: 46,
-          decoration: BoxDecoration(
-            color: AppColors.mainColor.withOpacity(0.7),
-            shape: BoxShape.circle,
+  Container _buildDateShape() {
+    return Container(
+      height: 46,
+      width: 46,
+      decoration: BoxDecoration(
+        color: AppColors.mainColor.withOpacity(0.7),
+        shape: BoxShape.circle,
+      ),
+      child: Center(
+        child: Text(
+          '${widget.event.date.day}',
+          style: const TextStyle(
+            color: AppColors.whiteColor,
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
           ),
-          child: Center(
-            child: Text(
-              '${event.date.day}',
-              style: const TextStyle(
-                color: AppColors.whiteColor,
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
+        ),
+      ),
+    );
+  }
+
+  Column _buildTitleDescription() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          widget.event.title,
+          style: TextStyle(
+            color: AppColors.blackColor.withOpacity(0.9),
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
           ),
         ),
         const SizedBox(
-          width: 16,
+          height: 8,
         ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              event.title,
-              style: TextStyle(
-                color: AppColors.blackColor.withOpacity(0.9),
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(
-              height: 8,
-            ),
-            Text(
-              event.description,
-              style: TextStyle(
-                color: AppColors.blackColor.withOpacity(0.7),
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(
-              height: 8,
-            ),
-          ],
+        Text(
+          widget.event.description,
+          style: TextStyle(
+            color: AppColors.blackColor.withOpacity(0.7),
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
         ),
-        const Spacer(),
-        Row(
-          children: [
-            Icon(
-              Icons.alarm_add,
-              size: 22,
-              color: AppColors.blackColor.withOpacity(0.6),
-            ),
-            const SizedBox(
-              width: 8,
-            ),
-            Text(
-              '${event.time.hour}:${event.time.minute}',
-              style: TextStyle(
-                color: AppColors.blackColor.withOpacity(0.9),
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-              ),
-            )
-          ],
+        const SizedBox(
+          height: 8,
         ),
-        CheckBoxItem(event: event)
+      ],
+    );
+  }
+
+  Row _buildAlarmTime() {
+    return Row(
+      children: [
+        Icon(
+          Icons.alarm_add,
+          size: 22,
+          color: AppColors.blackColor.withOpacity(0.6),
+        ),
+        const SizedBox(
+          width: 8,
+        ),
+        Text(
+          '${widget.event.time.hour}:${widget.event.time.minute}',
+          style: TextStyle(
+            color: AppColors.blackColor.withOpacity(0.9),
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+          ),
+        )
       ],
     );
   }
 }
 
-class CheckBoxItem extends StatefulWidget {
-  final EventModel event;
-  const CheckBoxItem({
-    required this.event,
-    super.key,
-  });
+class EventChekcedBox extends StatefulWidget {
+  final EventModel eventModel;
+  const EventChekcedBox({super.key, required this.eventModel});
 
   @override
-  State<CheckBoxItem> createState() => _CheckBoxItemState();
+  State<EventChekcedBox> createState() => _EventChekcedBoxState();
 }
 
-class _CheckBoxItemState extends State<CheckBoxItem> {
+class _EventChekcedBoxState extends State<EventChekcedBox> {
   bool _isBoxChecked = false;
 
   @override
   void initState() {
     super.initState();
-    _isBoxChecked = widget.event.isDone;
+    _isBoxChecked = widget.eventModel.isDone;
   }
 
   @override
@@ -144,14 +155,9 @@ class _CheckBoxItemState extends State<CheckBoxItem> {
         onChanged: (newValue) {
           setState(() {
             _isBoxChecked = newValue!;
-            widget.event.isDone = _isBoxChecked;
-            widget.event.save();
+            widget.eventModel.isDone = _isBoxChecked;
+            widget.eventModel.save();
           });
-          BlocProvider.of<CalendarBloc>(context)
-              .add(CalendarDeletedEvent(widget.event));
-
-          BlocProvider.of<CalendarBloc>(context).add(
-              CalendarCompletedEvent(widget.event.title, widget.event.date));
         },
       ),
     );
