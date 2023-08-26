@@ -1,9 +1,11 @@
+import 'package:animated_icon/animated_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_calender/bloc/calendar_bloc.dart';
 import 'package:flutter_calender/data/model/done_event.dart';
 import 'package:flutter_calender/data/model/event.dart';
 import 'package:flutter_calender/ui/widgets/completed_event_item.dart';
+import 'package:flutter_calender/ui/widgets/custom_animate_icon.dart';
 import 'package:flutter_calender/ui/widgets/event_item.dart';
 import 'package:flutter_calender/utilities/const_colors.dart';
 
@@ -53,9 +55,7 @@ class CompletedEvents extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return completedEvents.isEmpty
-        ? const Center(
-            child: Text('empty'),
-          )
+        ? const EmptyList()
         : CustomScrollView(
             slivers: [
               SliverPadding(
@@ -129,6 +129,37 @@ class OngoingEvents extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class EmptyList extends StatelessWidget {
+  const EmptyList({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.only(top: 80),
+      child: Column(
+        children: [
+          SizedBox(
+            height: 40,
+            width: 40,
+            child: CustomAnimatedIcon(
+              color: AppColors.greyColor,
+              animateIcon: AnimateIcons.list,
+            ),
+          ),
+          Text(
+            'empty',
+            style: TextStyle(
+              color: AppColors.greyColor,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

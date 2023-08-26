@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_calender/bloc/calendar_bloc.dart';
-import 'package:flutter_calender/cubit/change_cubit.dart';
 import 'package:flutter_calender/di/get_it.dart';
 import 'package:flutter_calender/ui/widgets/add_event_button.dart';
 import 'package:flutter_calender/ui/widgets/tabbar_view_content.dart';
@@ -20,8 +19,6 @@ class CalenderScreen extends StatefulWidget {
 
 class _CalenderScreenState extends State<CalenderScreen>
     with SingleTickerProviderStateMixin {
-  final AppCubit appCubit = AppCubit();
-
   DateTime _today = DateTime.now();
   DateTime _selectedDay = DateTime.now();
   TabController? _tabController;
@@ -49,131 +46,126 @@ class _CalenderScreenState extends State<CalenderScreen>
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AppCubit, CubitState>(
-      bloc: appCubit,
-      builder: (context, state) {
-        return Scaffold(
-          backgroundColor: AppColors.backgroundColor,
-          resizeToAvoidBottomInset: false,
-          appBar: _buildCalenderAppbar(),
-          body: NotificationListener<UserScrollNotification>(
-            onNotification: (notification) {
-              setState(() {
-                if (notification.direction == ScrollDirection.forward) {
-                  _isFabVisible = true;
-                }
-                if (notification.direction == ScrollDirection.reverse) {
-                  _isFabVisible = false;
-                }
-              });
-              return true;
+    return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
+      resizeToAvoidBottomInset: false,
+      appBar: _buildCalenderAppbar(),
+      body: NotificationListener<UserScrollNotification>(
+        onNotification: (notification) {
+          setState(() {
+            if (notification.direction == ScrollDirection.forward) {
+              _isFabVisible = true;
+            }
+            if (notification.direction == ScrollDirection.reverse) {
+              _isFabVisible = false;
+            }
+          });
+          return true;
+        },
+        child: SafeArea(
+          child: BlocConsumer<CalendarBloc, CalendarState>(
+            listener: (context, state) {
+              if (state is CalendarUpdateDataState) {
+                context
+                    .read<CalendarBloc>()
+                    .add(CalendarFetchedDataFromHiveEvent());
+              }
             },
-            child: SafeArea(
-              child: BlocConsumer<CalendarBloc, CalendarState>(
-                listener: (context, state) {
-                  if (state is CalendarUpdateDataState) {
-                    context
-                        .read<CalendarBloc>()
-                        .add(CalendarFetchedDataFromHiveEvent());
-                  }
-                },
+            builder: (context, state) {
+              return BlocBuilder<CalendarBloc, CalendarState>(
                 builder: (context, state) {
-                  return BlocBuilder<CalendarBloc, CalendarState>(
-                    builder: (context, state) {
-                      if (state is CalendarFetchDataFromHiveState) {
-                        totalEvents = state.events.length;
-                        completedEvents = state.completedEvents.length;
-                      }
-                      return Column(
-                        children: [
-                          Card(
-                            child: TableCalendar(
-                              firstDay: DateTime.utc(2010, 10, 16),
-                              lastDay: DateTime.utc(2030, 3, 14),
-                              focusedDay: _today,
-                              calendarFormat: CalendarFormat.month,
-                              headerStyle: const HeaderStyle(
-                                titleCentered: true,
-                                formatButtonVisible: false,
-                              ),
-                              availableGestures: AvailableGestures.all,
-                              calendarStyle: CalendarStyle(
-                                canMarkersOverflow: true,
-                                todayDecoration: FuncUtils.calenderDecoration(
-                                  AppColors.mainColor.withOpacity(0.2),
-                                ),
-                                todayTextStyle: FuncUtils.dayTextStyle(
-                                    AppColors.blackColor),
-                                selectedDecoration:
-                                    FuncUtils.calenderDecoration(
-                                  AppColors.mainColor,
-                                ),
-                                markersMaxCount: 1,
-                                markerSize: 10,
-                                markerDecoration: FuncUtils.calenderDecoration(
-                                  AppColors.markColor,
-                                ),
-                                selectedTextStyle: FuncUtils.dayTextStyle(
-                                    AppColors.whiteColor),
-                              ),
-                              selectedDayPredicate: (day) =>
-                                  isSameDay(day, _selectedDay),
-                              onDaySelected: _onDaySelected,
-                              onPageChanged: (focusedDay) =>
-                                  appCubit.onChanged(focusedDay),
-                              eventLoader: (day) {
-                                return (state is CalendarFetchDataFromHiveState)
-                                    ? getEventsByDay(state.events, day)
-                                    : [];
-                              },
-                            ),
+                  if (state is CalendarFetchDataFromHiveState) {
+                    totalEvents = state.events.length;
+                    completedEvents = state.completedEvents.length;
+                  }
+                  return Column(
+                    children: [
+                      Card(
+                        child: TableCalendar(
+                          firstDay: DateTime.utc(2010, 10, 16),
+                          lastDay: DateTime.utc(2030, 3, 14),
+                          focusedDay: _today,
+                          calendarFormat: CalendarFormat.month,
+                          headerStyle: const HeaderStyle(
+                            titleCentered: true,
+                            formatButtonVisible: false,
                           ),
-                          TabBarItems(tabController: _tabController),
-                          if (state is CalendarFetchDataFromHiveState) ...{
-                            Expanded(
-                              child: TabBarViewContent(
-                                _tabController,
-                                _selectedDay,
-                                state.events,
-                                state.completedEvents,
-                              ),
+                          availableGestures: AvailableGestures.all,
+                          calendarStyle: CalendarStyle(
+                            canMarkersOverflow: true,
+                            todayDecoration: FuncUtils.calenderDecoration(
+                              AppColors.mainColor.withOpacity(0.2),
                             ),
+                            todayTextStyle:
+                                FuncUtils.dayTextStyle(AppColors.blackColor),
+                            selectedDecoration: FuncUtils.calenderDecoration(
+                              AppColors.mainColor,
+                            ),
+                            markersMaxCount: 1,
+                            markerSize: 10,
+                            markerDecoration: FuncUtils.calenderDecoration(
+                              AppColors.markColor,
+                            ),
+                            selectedTextStyle:
+                                FuncUtils.dayTextStyle(AppColors.whiteColor),
+                          ),
+                          selectedDayPredicate: (day) =>
+                              isSameDay(day, _selectedDay),
+                          onDaySelected: _onDaySelected,
+                          onPageChanged: (focusedDay) => setState(() {
+                            _today = focusedDay;
+                          }),
+                          eventLoader: (day) {
+                            return (state is CalendarFetchDataFromHiveState)
+                                ? getEventsByDay(state.events, day)
+                                : [];
                           },
-                        ],
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-          ),
-          floatingActionButton: Visibility(
-            visible: _isFabVisible,
-            child: FloatingActionButton(
-              backgroundColor: AppColors.buttonColor,
-              onPressed: () => showModalBottomSheet(
-                barrierColor: Colors.transparent,
-                backgroundColor: Colors.transparent,
-                isScrollControlled: true,
-                context: context,
-                builder: (context) {
-                  return BlocProvider.value(
-                    value: locator.get<CalendarBloc>(),
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                          bottom: MediaQuery.of(context).viewInsets.bottom),
-                      child: AddNewEventButtonsheet(
-                        selectedDay: _selectedDay,
+                        ),
                       ),
-                    ),
+                      TabBarItems(tabController: _tabController),
+                      if (state is CalendarFetchDataFromHiveState) ...{
+                        Expanded(
+                          child: TabBarViewContent(
+                            _tabController,
+                            _selectedDay,
+                            state.events,
+                            state.completedEvents,
+                          ),
+                        ),
+                      },
+                    ],
                   );
                 },
-              ),
-              child: const Icon(Icons.add),
-            ),
+              );
+            },
           ),
-        );
-      },
+        ),
+      ),
+      floatingActionButton: Visibility(
+        visible: _isFabVisible,
+        child: FloatingActionButton(
+          backgroundColor: AppColors.buttonColor,
+          onPressed: () => showModalBottomSheet(
+            barrierColor: Colors.transparent,
+            backgroundColor: Colors.transparent,
+            isScrollControlled: true,
+            context: context,
+            builder: (context) {
+              return BlocProvider.value(
+                value: locator.get<CalendarBloc>(),
+                child: Padding(
+                  padding: EdgeInsets.only(
+                      bottom: MediaQuery.of(context).viewInsets.bottom),
+                  child: AddNewEventButtonsheet(
+                    selectedDay: _selectedDay,
+                  ),
+                ),
+              );
+            },
+          ),
+          child: const Icon(Icons.add),
+        ),
+      ),
     );
   }
 
