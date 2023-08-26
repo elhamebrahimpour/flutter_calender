@@ -87,6 +87,7 @@ class _EventItemGeneratorState extends State<EventItemGenerator> {
         ),
         Text(
           widget.event.description,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: AppColors.blackColor.withOpacity(0.7),
             fontSize: 16,
